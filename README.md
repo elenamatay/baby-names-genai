@@ -4,6 +4,10 @@ Welcome to my Coding Journey!
 
 This repository is a collection of personal and professional coding projects, showcasing my skills and interests 🤓
 
+**Created:** 15 Dec 2024. Although made publicly available on this date, please note that this repository showcases code developed throughout my last 5 years of experience.
+
+**Last Updated:** 15 Dec 2024.
+ 
 ## Structure
 
 This repository uses a hybrid structure:
