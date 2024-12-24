@@ -3,13 +3,16 @@ import json
 import asyncio # Not needed in a notebook, only used when runnning in a standalone Python program, as there  you need to start the asyncio event loop yourself 
 import os
 from vertexai.generative_models import GenerativeModel, SafetySetting
+from vertexai.preview.prompts import Prompt
 from google.cloud import storage
+from google.api_core.exceptions import NotFound
 from collections import defaultdict
 
-PROJECT_ID="your_project_id" # @param - GCP Project ID
+PROJECT_ID= "your_project_id" # @param - GCP Project ID
 LOCATION="your_location" # @param - Region where resources will run and be deployed
 MODEL="your_selected_model" # @param - Selected LLM - Notebook runs successfully with "gemini-1.5-flash-002"
 BUCKET_ID="your_bucket_id" # @param - GCS Bucket ID to store master JSON file in
+
 
 SAFETY_SETTINGS = [
     SafetySetting(
@@ -515,4 +518,191 @@ def upload_to_gcs(source_file_name, destination_blob_name):
 
 
 
-# PART 2: Helper functions for Names Generation / Finding
+# PART 2: Helper functions for Names Finding / Generation
+
+
+def read_object(object_name):
+  """Reads an object from a Google Cloud Storage bucket.
+
+  Args:
+    bucket_name: The name of the bucket.
+    object_name: The name of the object.
+
+  Returns:
+    The contents of the object as a string.
+  """
+
+  storage_client = storage.Client(project=PROJECT_ID)
+  bucket = storage_client.bucket(BUCKET_ID)
+  blob = bucket.blob(object_name)
+
+  try:
+    contents = blob.download_as_string()
+    return json.loads(contents.decode("utf-8"))
+  except NotFound:
+    return  '{ "no such object: "gs://' + BUCKET_ID + "/" + object_name + '"}'
+
+def filter_names(form_data):
+
+    # Determine the master JSON file path based on gender
+    gender = form_data.get("gender", "").lower()
+    if gender == "boy":
+        master_json = read_object('B_master.json')
+    elif gender == "girl":
+        master_json = read_object('G_master.json')
+    elif gender == "undefined yet":
+        master_json = read_object('A_master.json')
+    else:
+        raise ValueError("Invalid gender specified in form data")
+    
+    print("Master JSON being used:" + str(master_json))
+
+    # Extract filters from form_data
+    origin_filter = form_data.get("origin", [])
+    length = form_data.get("length", [])
+    attribute_filter = form_data.get("attributes", [])
+
+    # Process syllables filter
+    syllables_filter = []
+    if length:
+        for l in length:
+            if l == "short":
+                syllables_filter.extend([1])
+            elif l == "medium":
+                syllables_filter.extend([2, 3])
+            elif l == "long":
+                syllables_filter.extend([4, 5, 6])
+    print(f"Syllables filter: {syllables_filter}")
+
+    print(f"Origin filter: {origin_filter}")
+    print(f"Attribute filter: {attribute_filter}")
+
+    # Initialize the result dictionary with all names
+    filtered_data = {
+        "$schema": master_json.get("$schema", ""),
+        "type": master_json.get("type", ""),
+        "properties": master_json.copy(),
+        "required": list(master_json.keys())
+    }
+
+    # Step 1: Filter by origin
+    for name in list(filtered_data["properties"].keys()):
+        details = filtered_data["properties"][name]
+        if details is None or not isinstance(details, dict):
+            del filtered_data["properties"][name]
+            filtered_data["required"].remove(name)
+            continue
+
+        origin = details.get("origin", "")
+        if not (origin_filter is None or (
+            isinstance(origin, list) and any(o in origin_filter for o in origin)
+        ) or origin in origin_filter):
+            del filtered_data["properties"][name]
+            filtered_data["required"].remove(name)
+
+    print(f"Number of names passing origin filter: {len(filtered_data['properties'])}")
+
+    # Step 2: Filter by syllables
+    for name in list(filtered_data["properties"].keys()):
+        details = filtered_data["properties"][name]
+        sound_details = details.get("sound_details", {})
+        syllables = 0
+        if isinstance(sound_details, dict):
+            syllables = sound_details.get("syllables", 0)
+
+        if not (syllables_filter is None or syllables in syllables_filter):
+            del filtered_data["properties"][name]
+            filtered_data["required"].remove(name)
+
+    print(f"Number of names passing origin + syllables filter: {len(filtered_data['properties'])}")
+
+    # Step 3: Filter by attributes
+    for name in list(filtered_data["properties"].keys()):
+        details = filtered_data["properties"][name]
+        attributes = details.get("attributes", [])
+        if not (attribute_filter is None or any(attr in attributes for attr in attribute_filter)):
+            del filtered_data["properties"][name]
+            filtered_data["required"].remove(name)
+
+    print(f"Number of names passing origin + syllables + attributes filter: {len(filtered_data['properties'])}")
+
+    # Step 4: Filter out names with the "Religious" attribute if it is not in the attribute filter
+    if "Religious" not in attribute_filter:
+        for name in list(filtered_data["properties"].keys()):
+            details = filtered_data["properties"][name]
+            if "Religious" in details.get("attributes", []):
+                del filtered_data["properties"][name]
+                filtered_data["required"].remove(name)
+
+    print(f"Number of names passing all filters (including religious exclusive): {len(filtered_data['properties'])}")
+
+    # Print the final list of names that meet all criteria, sorted alphabetically
+    final_names = sorted(filtered_data["required"])
+    print(f"Final list of names: {final_names}")
+
+    return filtered_data
+
+    
+generation_config = {
+    "max_output_tokens": 8192,
+    "temperature": 0.0,
+    "top_p": 0.5,
+    "response_mime_type": "application/json"
+}
+
+
+# Text template for the prompt
+text1 = """You are a Baby Name Expert tasked with finding the perfect names for newborns. You\'ll receive information about the family\'s values and a list of potential names. Your goal is to suggest the 10 best names, explaining why each one is a great fit.  Get ready to spread some baby-naming joy!
+
+**Instructions:**
+
+1. Carefully review the family\'s input form (`{form_data}`). Pay close attention to their values, interests, and any specific preferences they mention. **This information is key to selecting the perfect names!**
+
+2. Consult the provided JSON list of filtered baby names (`{baby_names}`). Each entry includes the name\'s meaning, origin, and other relevant details.  **You are to ONLY select names from this list.**
+
+3. Based *especially* on the family\'s stated values and the names meanings, select the 10 names from the provided list of baby names that best align with their preferences. Select unique names (not variations from one another) that you believe will resonate with the family's values.
+
+4. Create a valid JSON called "names", containing the 10 suggested names. Each name should have the following information:
+  * **Name:** The suggested name.
+  * **Origin:** The name\'s origin.
+  * **Meaning:** The name\'s meaning.
+  * **Why it\'s Perfect:** **This is the most crucial part!** Provide a detailed and enthusiastic explanation of why this name is a great fit for the family, **explicitly highlighting the connection between the name\'s attributes (meaning, origin, etc.) and the family\'s stated values, interests, and preferences.** Be specific and draw clear connections. Let your excitement shine through! Make sure to address the family directly by using "you" and "your" when referring to them, their values, and their preferences.
+
+IMPORTANT: Remember to ONLY evaluate the list of provided names. You are NOT allowed to suggest any name that is not on the list.
+
+Remember to be enthusiastic and showcase your expertise in connecting names to family values! Let\'s find the perfect names for this special little one and make this naming journey amazing!
+"""
+
+# Function to generate names based on user's input form content
+def generate(form_data, baby_names, model_id=MODEL):
+    # Initialize Vertex AI with project and location
+    vertexai.init(project=PROJECT_ID, location=LOCATION)
+
+    # Log the number of names received as input
+    print(f"Number of names received by generate function: {len(baby_names['properties'])}")
+
+
+    # Variables for the prompt
+    variables = [
+        {
+            "form_data": json.dumps(form_data, indent=2, ensure_ascii=False),
+            "baby_names": json.dumps(baby_names, indent=2, ensure_ascii=False),
+        },
+    ]
+    
+    # Create a prompt with the given text and variables
+    prompt = Prompt(
+        prompt_data=[text1],
+        model_name=model_id,
+        variables=variables,
+        generation_config=generation_config,
+        safety_settings=SAFETY_SETTINGS,
+    )
+    
+    # Generate content using the assembled prompt
+    response = prompt.generate_content(
+        contents=prompt.assemble_contents(**prompt.variables[0]),
+        stream=False,
+    )
+
+    return response.text
