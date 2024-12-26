@@ -1,0 +1,27 @@
+{
+    "bar-muscle-up": {
+        "form": {
+            "Steps": "\n1. Grip the bar with a false grip (your wrists flexed and your knuckles above the bar). \n2. Initiate the movement by powerfully pulling the bar toward your stomach. \n3. When you reach the transition point between pulling and pushing, lean forward so the bar connects with your stomach. \n4. Finish the movement by extending your elbows to lock out at the top.",
+            "Form": {
+                "1. False Grip": "This odd and quite uncomfortable grip is required for a smooth transition above the bar. The false grip could be described as a midpoint between a pull-up grip and a dip grip, eliminating the need for a grip switch in the transition.",
+                "2. Pulling Path": "Though a pull-up is usually executed in a vertical path straight up to the bar, a muscle-up is easier to do around the bar in a more circular pattern. This will help you create some space for your body away from the bar, instead of you pulling straight into it, which definitely will decrease the possibility of you reaching the top. The easiest way to create this “pulling around pattern” is to start the rep with the body slightly rocked forward. Not so much that it leads you to a kip, but so that you set your initial pulling power in the direction around the bar.",
+                "3. Transition Phase": "The transition is the hardest part. To get through this tough part, you need (in addition to using the false grip) a really strong drive from the pull-up. By creating speed already from the start of the pull-up, you’ll be able to fly halfway through the transition, making it a lot easier to get through. The stronger you are in pull-ups, the easier this phase will be.",
+                "4. Dip Finish": "Complete the movement with a controlled dip, locking out the elbows and achieving a full range of motion."
+            }
+        },
+        "tempo": "10X1: 1 second for the pull-up, X seconds (2-4 seconds) to control the transition and dip, and 1 second to pause at the top. Why? The explosive pull-up generates momentum for the transition. A controlled transition and dip ensure proper form and prevent injury. The pause at the top reinforces the lockout and promotes stability.",
+        "commonMistakes": {
+            "Dividing the Movement": "Trying to achieve a muscle-up by executing it divided into three separate steps (pull-up + transition + dip = Muscle-up) makes it harder than it already is. A better way is to really visualize the muscle-up as one fluid movement starting from the bottom, and now we’re here, at the top.",
+            "Not Being Strong Enough": "You must have sufficient strength to be able to lift your body’s weight. Without sufficient strength in your upper body, you’ll (probably) never be able to happily celebrate your strict muscle-up success from on top of the bar, out over the gym."
+        },
+        "comments": {
+            "Weighted Strict Pull-ups": "This pull-up variation is great for increasing your ability to create as much power as possible in lower rep schemes. And since the first main goal when starting to train for muscle-ups most often is to be able to do one muscle-up, it could be wise to prioritize training towards a strong 1RM pull-up along the way. Try working with 4–5 sets of 3–5 reps per weighted pull-up session two times a week. Maybe start with something light and then progressively add weight for every session you manage your selected set and reps.",
+            "Banded Stomach To Bar": "Or without a band if you can! This variation resembles the first part of the banded (or not banded) muscle-up. Though this could be considered both a strength and a gymnastic skill exercise I would recommend a low number of reps per set. Try 5–6 sets x 2–3 reps and assess the quality of the reps according to how a muscle-up is executed.",
+            "Eccentric Muscle-Ups": "This fun and hard variation pays off well if this is where you are in your muscle-up journey. To benefit from this variation, it’s good to have sufficient strength to control the descent and especially the transfer part with a good tempo."
+        },
+        "alternativesAndVariations": {
+            "1. Jumping Muscle-Ups": "The jumping muscle-up is a great way to practice the full movement of the muscle-up. It lets you get a feel for the transition and also tests your lock-out strength in the dip. When you can do jumping muscle-ups, gradually lower the box height to keep progressing.",
+            "2. Banded Bar Muscle-ups": "This variation uses the same principles as the box variation, except you now borrow strength from a rubber band instead of jumping off a box. When you can do banded muscle-ups, gradually use thinner bands to keep progressing."
+        }
+    }
+}
