@@ -1,48 +1,67 @@
-# Elena's AI Playground
+# Baby Names AI Project
 
-Welcome to my Coding Journey!
+This repo showcases a side project that leverages AI to find the ideal name for an upcoming baby based on their family's preferences.
 
-This repository is a collection of personal and professional coding projects, showcasing my skills and interests 🤓
+## Overview
+This project generates synthetic data about baby names, starting with a Kaggle dataset of names and using Gemini AI to enrich each name with various attributes such as meaning, origin, sound details, and other useful information. The data is then cleansed and prepared for further use. Based on user input from a questionnaire/form, the project filters the data and makes another call to Gemini to find the most suitable names for a family.
 
-**Created:** 15 Dec 2024. Although made publicly available on this date, please note that this repository showcases code developed throughout my last 5 years of experience.
+## Key Files
 
-**Last Updated:** 15 Dec 2024.
- 
-## Structure
+As this project is in prod in a public website, I only published here a couple of code sample files, instead of the whole repo. The two files attached to this repo are:
 
-This repository uses a hybrid structure:
+#### 1. `girl-names-db.ipynb`
+This Jupyter notebook outlines the process of creating a dataset for girl names. It includes:
+- Setup: Imports necessary libraries and sets up the environment.
+- Helper Functions: Defines functions to generate, process, and clean baby names data.
+- Data Generation: Uses Gemini AI to generate detailed information about each girl name, leveraging few-shot learning.
+- Data Enhancement: Further nurtres the data with attributes based on keywords from the generated info.
+- Data Cleansing: Cleans the generated data to ensure accuracy and consistency.
+- Master JSON Creation: Merges individual JSON files into a master JSON file for further use.
 
-- **Project-based**: Organized into folders representing different kinds of projects I work on: Personal or side projects, work projects, event projects.
-- **Type-based**: Within each project folder, code is further organized by type (e.g., Python, Jupyter Notebooks, SQL, Typescript).
+#### 2. `generate_names_new.py`
+This script is responsible for finding the ideal baby names based on user input using Gemini AI. It is actually the source code for a Cloud Function that is triggered everytime a user fulfills an input questionnaire with their name preferences, and it includes the following key components:
+- Vertex AI Initialization: Sets up the Vertex AI environment with project details.
+- Safety Settings: Configures safety settings to filter out harmful content.
+- User Input Processing: Collects and processes user input from a questionnaire/form.
+- Data Filtering: Filters the baby names data based on user preferences (e.g., origins, sound details, attributes).
+- Name Recommendation: Uses Gemini AI to find the most suitable names for a family based on the filtered data.
+- Output Generation: Creates a JSON output with the top 10 recommended names and detailed explanations for each.
 
-## Projects
+## Project Workflow
 
-### 🤠 Side Projects:
-Personal projects I've built for leisure.
-- project1/: [Brief description of project1, including technologies used]
-- project2/: [Brief description of project2, including technologies used]
+1. Data Generation:
+- Start with a Kaggle dataset of baby names.
+- Use Gemini AI to enrich each name with detailed information.
+- Save the generated data to Google Cloud Storage.
 
-### 💼 Customer Projects:
-Projects I've worked on as part of my professional experience. Anonymized versions of pieces of code for customer projects are included for demonstration purposes.
-- project_a/: [Brief description of project_a, including technologies used]
-- project_b/: [Brief description of project_b, including technologies used]
+2. Data Cleansing:
+- Clean the generated data to remove any inconsistencies.
+- Merge individual JSON files into a master JSON file.
 
-### 📢 Event Projects:
-Demos I've built for events, public talks, or community building.
-- meetup_x/: [Brief description of meetup_x, including materials and code examples]
-- workshop_y/: [Brief description of workshop_y, including materials and code examples]
+3. User Input Processing:
+- Collect user input from a questionnaire/form.
+- Filter the data based on user preferences (e.g., origins, sound details, attributes).
 
+4. Name Recommendation:
+- Use Gemini AI to find the most suitable names for a family based on the filtered data.
+- Return the top 10 names to the user with detailed explanations.
 
-## License
+## How to Use
+1. Clone the repository:
+```
+git clone https://github.com/elenamatay/baby-names-ai.git
+cd baby-names-ai
+```
 
-This repository is licensed under the Apache 2.0 License. See the LICENSE file for details.
+2. Set up the environment by installing the required dependencies:
+```
+pip install -r requirements.txt
+```
 
-## Contact
+3. Run the Jupyter notebook:
+- Open `girl-names-db.ipynb` in Jupyter Notebook or JupyterLab.
+- Follow the instructions in the notebook to generate and process baby names data.
 
-You can connect with me on [LinkedIn](https://www.linkedin.com/in/elena-mata-yandiola/) or via email (elenamatay@gmail.com).
-
-I hope you like it!
-
-Best,
-
-Elena
+4. Deploy the Cloud Function:
+- Deploy the `generate_names.py` script as a Google Cloud Function.
+- Configure the function to handle user input and return name recommendations.
